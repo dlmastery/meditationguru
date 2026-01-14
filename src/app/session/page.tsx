@@ -4,11 +4,13 @@ import { useState, useEffect, useCallback, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter, useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
-import { X, Pause, Play, SkipForward, Heart, Video, VideoOff } from 'lucide-react';
+import { X, Pause, Play, SkipForward, Heart, Video, VideoOff, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAppStore } from '@/lib/store';
 import { GlassCard, Button, AILoadingSpinner } from '@/components/ui';
 import GuruAvatar from '@/components/guru/GuruAvatar';
+import { YogaPoseIllustration } from '@/components/yoga';
 import { GeminiLiveSession, GURU_VOICES } from '@/lib/gemini';
+import { YOGA_POSES, YOGA_FLOWS, type YogaPoseId } from '@/lib/imagen';
 
 const CosmicScene = dynamic(() => import('@/components/three/CosmicScene'), {
   ssr: false,
@@ -41,6 +43,11 @@ function SessionContent() {
   const [mood, setMood] = useState<'before' | 'after'>('before');
   const [selectedMood, setSelectedMood] = useState('');
 
+  // Yoga pose tracking
+  const [currentPoseIndex, setCurrentPoseIndex] = useState(0);
+  const [currentFlow] = useState(YOGA_FLOWS['sun-salutation']); // Default to sun salutation
+  const currentPose = sessionType === 'yoga' ? currentFlow.poses[currentPoseIndex] : null;
+
   const sessionMessages = sessionType === 'meditation'
     ? [
         "Preparing your meditation space...",
@@ -51,11 +58,28 @@ function SessionContent() {
       ]
     : [
         "Preparing your yoga mat...",
-        "Warming up the practice space...",
+        "Generating pose illustrations...",
+        "Activating Nano Banana AI...",
         "Loading pose guidance...",
-        "Activating movement sensors...",
         "Your Guru is ready...",
       ];
+
+  // Navigate poses
+  const handlePrevPose = () => {
+    if (currentPoseIndex > 0) {
+      setCurrentPoseIndex(prev => prev - 1);
+      const prevPose = currentFlow.poses[currentPoseIndex - 1];
+      liveSession?.sendText(`Guide me through ${YOGA_POSES[prevPose]?.name || prevPose}`);
+    }
+  };
+
+  const handleNextPose = () => {
+    if (currentPoseIndex < currentFlow.poses.length - 1) {
+      setCurrentPoseIndex(prev => prev + 1);
+      const nextPose = currentFlow.poses[currentPoseIndex + 1];
+      liveSession?.sendText(`Now let's move to ${YOGA_POSES[nextPose]?.name || nextPose}`);
+    }
+  };
 
   // Timer
   useEffect(() => {
@@ -276,6 +300,45 @@ function SessionContent() {
                 <div className="text-center">
                   <p className="text-white/80 text-lg capitalize">{breathPhase}</p>
                 </div>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Yoga Pose Illustration (Yoga only) */}
+          {sessionType === 'yoga' && currentPose && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="mb-6"
+            >
+              <YogaPoseIllustration
+                poseId={currentPose}
+                style="line-drawing"
+                size="lg"
+              />
+
+              {/* Pose Navigation */}
+              <div className="flex items-center justify-center gap-4 mt-4">
+                <button
+                  onClick={handlePrevPose}
+                  disabled={currentPoseIndex === 0}
+                  className="p-2 rounded-full bg-white/10 hover:bg-white/20 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                >
+                  <ChevronLeft className="w-6 h-6 text-white" />
+                </button>
+                <div className="text-center">
+                  <p className="text-white/60 text-sm">
+                    Pose {currentPoseIndex + 1} of {currentFlow.poses.length}
+                  </p>
+                  <p className="text-white font-medium">{currentFlow.name}</p>
+                </div>
+                <button
+                  onClick={handleNextPose}
+                  disabled={currentPoseIndex === currentFlow.poses.length - 1}
+                  className="p-2 rounded-full bg-white/10 hover:bg-white/20 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                >
+                  <ChevronRight className="w-6 h-6 text-white" />
+                </button>
               </div>
             </motion.div>
           )}
