@@ -8,8 +8,9 @@ import { ArrowLeft, Star, Clock, Flame, TrendingUp } from 'lucide-react';
 import { GlassCard } from '@/components/ui';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAppStore } from '@/lib/store';
-import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
-import { db } from '@/lib/firebase';
+// Firestore imports for future use
+// import { collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
+// import { db } from '@/lib/firebase';
 
 const CosmicScene = dynamic(() => import('@/components/three/CosmicScene'), {
   ssr: false,

@@ -19,7 +19,7 @@ const CosmicScene = dynamic(() => import('@/components/three/CosmicScene'), {
 
 export default function SettingsPage() {
   const router = useRouter();
-  const { user, loginWithGoogle, logout } = useAuth();
+  const { user, signInWithGoogle, logout } = useAuth();
   const { guruVoice, setGuruVoice } = useAppStore();
 
   const [showVoiceSelector, setShowVoiceSelector] = useState(false);
@@ -54,7 +54,7 @@ export default function SettingsPage() {
           icon: <User className="w-5 h-5" />,
           label: 'Profile',
           value: user?.displayName || user?.email || 'Guest',
-          action: user ? () => {} : loginWithGoogle,
+          action: user ? () => {} : signInWithGoogle,
         },
       ],
     },
@@ -137,7 +137,7 @@ export default function SettingsPage() {
               <Button
                 variant="primary"
                 icon={<LogIn className="w-5 h-5" />}
-                onClick={loginWithGoogle}
+                onClick={signInWithGoogle}
                 className="mx-auto"
               >
                 Sign In with Google
