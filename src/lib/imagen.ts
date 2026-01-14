@@ -86,7 +86,7 @@ NO text or labels in the image.`;
 
   try {
     const response = await genAI.models.generateContent({
-      model: 'gemini-2.5-flash-preview-04-17',
+      model: 'gemini-2.5-flash-image',
       contents: prompt,
       config: {
         responseModalities: ['IMAGE'],
@@ -131,7 +131,7 @@ Glowing ethereal quality.`;
 
   try {
     const response = await genAI.models.generateContent({
-      model: 'gemini-2.5-flash-preview-04-17',
+      model: 'gemini-2.5-flash-image',
       contents: prompt,
       config: {
         responseModalities: ['IMAGE'],
@@ -177,7 +177,7 @@ Professional yoga app illustration quality.`;
 
   try {
     const response = await genAI.models.generateContent({
-      model: 'gemini-2.5-flash-preview-04-17',
+      model: 'gemini-2.5-flash-image',
       contents: prompt,
       config: {
         responseModalities: ['IMAGE'],
