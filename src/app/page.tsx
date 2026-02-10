@@ -159,12 +159,12 @@ export default function HomePage() {
     setCurrentTranscript('');
   };
 
-  // Quick action buttons
+  // Quick action buttons - navigate to session page
   const quickActions = [
-    { label: 'Meditate', icon: '🧘', action: () => sendMessage("I want to meditate") },
-    { label: 'Yoga', icon: '🌟', action: () => sendMessage("Let's do some yoga") },
-    { label: 'Relax', icon: '🌊', action: () => sendMessage("Help me relax") },
-    { label: 'Focus', icon: '🎯', action: () => sendMessage("I need to focus") },
+    { label: 'Meditate', icon: '🧘', action: () => router.push('/session?type=meditation') },
+    { label: 'Yoga', icon: '🌟', action: () => router.push('/session?type=yoga') },
+    { label: 'Relax', icon: '🌊', action: () => router.push('/session?type=meditation&goal=relax') },
+    { label: 'Focus', icon: '🎯', action: () => router.push('/session?type=meditation&goal=focus') },
   ];
 
   if (authLoading || isLoading) {
