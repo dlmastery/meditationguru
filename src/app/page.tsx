@@ -46,10 +46,9 @@ export default function HomePage() {
   // Check auth and onboarding status
   useEffect(() => {
     if (!authLoading) {
+      setIsLoading(false);
       if (!onboardingComplete) {
         router.push('/onboarding');
-      } else {
-        setIsLoading(false);
       }
     }
   }, [authLoading, onboardingComplete, router, setIsLoading]);
