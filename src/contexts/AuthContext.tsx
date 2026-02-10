@@ -28,49 +28,63 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const { user, setUser, setOnboardingComplete } = useAppStore();
 
   useEffect(() => {
+    // Timeout fallback: if Firebase Auth doesn't respond within 4 seconds,
+    // stop loading so the app remains usable without auth.
+    const timeout = setTimeout(() => {
+      if (loading) {
+        console.warn('Firebase Auth timed out, continuing without auth');
+        setLoading(false);
+      }
+    }, 4000);
+
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      clearTimeout(timeout);
       setFirebaseUser(firebaseUser);
 
       if (firebaseUser) {
         // Fetch or create user document
-        const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
+        try {
+          const userDoc = await getDoc(doc(db, 'users', firebaseUser.uid));
 
-        if (userDoc.exists()) {
-          const userData = userDoc.data() as User;
-          setUser(userData);
-          setOnboardingComplete(userData.onboarding?.completed || false);
-        } else {
-          // Create new user document
-          const newUser: Partial<User> = {
-            uid: firebaseUser.uid,
-            email: firebaseUser.email || '',
-            displayName: firebaseUser.displayName || '',
-            photoURL: firebaseUser.photoURL || '',
-            preferences: {
-              guruVoice: 'Kore',
-              preferredDuration: 10,
-              reminderTimes: ['08:00', '20:00'],
-              primaryGoals: [],
-              experienceLevel: 'beginner',
-            },
-            onboarding: {
-              completed: false,
-              selectedOrbs: [],
-            },
-            subscription: {
-              isDonor: false,
-              donationTotal: 0,
-            },
-          };
+          if (userDoc.exists()) {
+            const userData = userDoc.data() as User;
+            setUser(userData);
+            setOnboardingComplete(userData.onboarding?.completed || false);
+          } else {
+            // Create new user document
+            const newUser: Partial<User> = {
+              uid: firebaseUser.uid,
+              email: firebaseUser.email || '',
+              displayName: firebaseUser.displayName || '',
+              photoURL: firebaseUser.photoURL || '',
+              preferences: {
+                guruVoice: 'Kore',
+                preferredDuration: 10,
+                reminderTimes: ['08:00', '20:00'],
+                primaryGoals: [],
+                experienceLevel: 'beginner',
+              },
+              onboarding: {
+                completed: false,
+                selectedOrbs: [],
+              },
+              subscription: {
+                isDonor: false,
+                donationTotal: 0,
+              },
+            };
 
-          await setDoc(doc(db, 'users', firebaseUser.uid), {
-            ...newUser,
-            createdAt: serverTimestamp(),
-            lastSessionAt: serverTimestamp(),
-          });
+            await setDoc(doc(db, 'users', firebaseUser.uid), {
+              ...newUser,
+              createdAt: serverTimestamp(),
+              lastSessionAt: serverTimestamp(),
+            });
 
-          setUser(newUser as User);
-          setOnboardingComplete(false);
+            setUser(newUser as User);
+            setOnboardingComplete(false);
+          }
+        } catch (error) {
+          console.error('Error fetching user data:', error);
         }
       } else {
         setUser(null);
@@ -80,7 +94,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false);
     });
 
-    return () => unsubscribe();
+    return () => {
+      clearTimeout(timeout);
+      unsubscribe();
+    };
   }, [setUser, setOnboardingComplete]);
 
   const signInWithGoogle = async () => {

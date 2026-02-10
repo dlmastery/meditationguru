@@ -43,15 +43,12 @@ export default function HomePage() {
   const [guruResponse, setGuruResponse] = useState('');
   const [sessionMood, setSessionMood] = useState<'calm' | 'energetic' | 'neutral'>('neutral');
 
-  // Check auth and onboarding status
+  // Clear loading state once auth resolves
   useEffect(() => {
     if (!authLoading) {
       setIsLoading(false);
-      if (!onboardingComplete) {
-        router.push('/onboarding');
-      }
     }
-  }, [authLoading, onboardingComplete, router, setIsLoading]);
+  }, [authLoading, setIsLoading]);
 
   // Initialize Gemini Live Session
   const initializeLiveSession = useCallback(async () => {
